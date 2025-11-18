@@ -12,4 +12,10 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "start"]
+# Build the NestJS project
+RUN npm run build
+
+# Expose port if your app uses one (e.g., 3000)
+EXPOSE 4000
+
+CMD ["node", "dist/main.js"]
