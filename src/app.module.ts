@@ -14,11 +14,11 @@ import { AppService } from './app.service';
     }),
     SequelizeModule.forRoot({
       dialect: 'mysql',
-      host: 'localhost',
-      port: 3306,
+      host: process.env.MYSQLHOST,
+      port: +process.env.MYSQLPORT!,
       username: 'root',
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      password: process.env.MYSQLPASSWORD,
+      database: process.env.MYSQLDATABASE,
       models: [User],
       autoLoadModels: true,
       synchronize: true, // auto create table
