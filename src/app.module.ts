@@ -3,6 +3,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from './users/user.model';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { FilesModule } from './files/files.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -24,6 +25,7 @@ import { AppService } from './app.service';
     }),
     SequelizeModule.forFeature([User]),
     AuthModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
