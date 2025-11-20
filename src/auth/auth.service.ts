@@ -41,24 +41,30 @@ export class AuthService {
   }
 
   // Generate both tokens
-  async getTokens(user: { id: number; email: string }) {
-  const payload = { sub: user.id, email: user.email };
+  async getTokens(user: { id: number; email: string; name: string; avatarUrl: string }) {
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    avatarUrl: user.avatarUrl,
+  };
 
   const accessToken = await this.jwtService.signAsync(payload, {
     secret: this.config.get<string>('JWT_ACCESS_SECRET')!,
     expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES') || '15m',
-  } as any);  // <-- FIX
+  } as any);
 
   const refreshToken = await this.jwtService.signAsync(
-    { sub: user.id },
+    { sub: user.id }, // refresh token doesn't need profile data
     {
       secret: this.config.get<string>('JWT_REFRESH_SECRET')!,
       expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES') || '7d',
-    } as any,  // <-- FIX
+    } as any,
   );
 
   return { accessToken, refreshToken };
 }
+
 
 
   // Hash and save refresh token to DB
@@ -80,7 +86,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(refreshToken, user.refreshToken);
     if (!isMatch) throw new UnauthorizedException('Invalid refresh token');
 
-    const tokens = await this.getTokens({ id: user.id, email: user.email });
+    const tokens = await this.getTokens({ id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl });
     await this.saveRefreshToken(user.id, tokens.refreshToken);
     return tokens;
   }

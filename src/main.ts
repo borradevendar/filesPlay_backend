@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-  origin: ['https://files-play-frontend.vercel.app', 'filesplaybackend-production.up.railway.app'],
+  origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL],
   credentials: true,
 });
   await app.listen(process.env.PORT || 3000);

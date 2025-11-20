@@ -24,6 +24,8 @@ export class AuthController {
     const tokens = await this.authService.getTokens({
       id: user.id,
       email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
     });
 
     // Save hashed refresh token in DB
@@ -31,7 +33,7 @@ export class AuthController {
 
     // Redirect user to frontend callback with tokens in URL
     const redirectUrl = `${process.env.FRONTEND_URL}/auth/callback` +
-      `?access=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
+      `?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
 
     return res.redirect(redirectUrl);
   }
