@@ -16,13 +16,27 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
+  // 🔥 This is the missing part — REQUIRED for refresh token!
+  authorizationParams(): Record<string, string> {
+    return {
+      access_type: 'offline',
+      prompt: 'consent',
+    };
+  }
+
   async validate(
     accessToken: string,
     refreshToken: string,
     profile: any,
     done: VerifyCallback,
-  ): Promise<any> {
+  ) {
     const user = await this.authService.validateOAuthUser(profile);
-    return done(null, user);
+
+    return done(null, {
+      ...user.dataValues,
+      googleAccessToken: accessToken,
+      googleRefreshToken: refreshToken, // will now be NON-NULL
+    });
   }
 }
+

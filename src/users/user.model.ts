@@ -51,4 +51,11 @@ export class User extends Model<
     allowNull: true,
   })
   declare refreshToken?: string | null;
+
+  @Column({
+  type: DataType.TEXT,
+  allowNull: true,
+})
+declare googleRefreshToken?: string | null;
+
 }

@@ -87,7 +87,49 @@ export class AuthService {
     if (!isMatch) throw new UnauthorizedException('Invalid refresh token');
 
     const tokens = await this.getTokens({ id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl });
-    await this.saveRefreshToken(user.id, tokens.refreshToken);
+    await this.saveRefreshToken(user.id, tokens.refreshToken);  
     return tokens;
   }
+
+  async saveGoogleRefreshToken(userId: number, token: string | null) {
+  if (!token) return; // Google only sends it on first login
+
+  await this.userModel.update(
+    { googleRefreshToken: token },
+    { where: { id: userId } },
+  );
+}
+
+async getNewGoogleAccessToken(refreshToken: string) {
+  const params = new URLSearchParams({
+    client_id: this.config.get<string>('GOOGLE_CLIENT_ID')!,
+    client_secret: this.config.get<string>('GOOGLE_CLIENT_SECRET')!,
+    refresh_token: refreshToken,
+    grant_type: 'refresh_token',
+  });
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    body: params,
+  });
+
+  const data = await res.json();
+  return data.access_token;
+}
+
+async getValidGoogleAccessToken(userId: number) {
+  const user = await this.userModel.findByPk(userId);
+
+  if (!user || !user.googleRefreshToken) {
+    throw new UnauthorizedException('Google account not linked');
+  }
+
+  const newAccessToken = await this.getNewGoogleAccessToken(
+    user.googleRefreshToken,
+  );
+
+  return newAccessToken;
+}
+
+
 }

@@ -20,6 +20,12 @@ export class AuthController {
   async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
     const user = req.user;
 
+    // Save Google refresh token
+  await this.authService.saveGoogleRefreshToken(
+    user.id,
+    user.googleRefreshToken,
+  );
+
     // Generate tokens
     const tokens = await this.authService.getTokens({
       id: user.id,
@@ -49,11 +55,31 @@ export class AuthController {
   async logout(@Body() body: { userId: number }) {
     await this.authService.removeRefreshToken(body.userId);
     return { ok: true };
-  }
+  } 
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   profile(@Req() req: any) {
     return req.user;
   }
+
+  @Get('google-drive/files')
+@UseGuards(JwtAuthGuard)
+async getDriveFiles(@Req() req: any) {
+  const googleAccessToken = await this.authService.getValidGoogleAccessToken(
+    req.user.sub,
+  );
+
+  const response = await fetch(
+    'https://www.googleapis.com/drive/v3/files',
+    {
+      headers: {
+        Authorization: `Bearer ${googleAccessToken}`,
+      },
+    },
+  );
+
+  return response.json();
+}
+
 }
